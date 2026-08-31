@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#7047e8">
+<link rel="manifest" href="manifest.json">
+<title>Моя Прибыль</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f6f5fb;color:#17182b}
+.app{max-width:520px;margin:auto;min-height:100vh;background:#fff}
+header{padding:20px 20px 4px;font-weight:800;font-size:25px}.sub{padding:0 20px 14px;color:#777;font-size:14px}
+.tabs{display:flex;margin:0 20px 14px;background:#f0eff8;border-radius:14px;padding:4px}.tabs button{flex:1;border:0;background:transparent;padding:11px;border-radius:11px;font-weight:700;color:#777}.tabs button.active{background:#fff;color:#6540e4;box-shadow:0 2px 8px #0001}
+main{padding:0 20px 90px}.card{border:1px solid #eeeef5;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 5px 20px #2221}
+label{display:block;font-size:13px;color:#777;margin:11px 0 6px}input{width:100%;border:1px solid #e2e1eb;border-radius:12px;padding:13px;font-size:16px;outline:none}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.primary{width:100%;border:0;border-radius:13px;background:#7047e8;color:#fff;font-size:16px;font-weight:800;padding:15px;margin-top:16px}
+.result{background:#25c457;color:#fff;border-radius:18px;padding:20px;margin:14px 0}.result small{opacity:.9}.profit{font-size:38px;font-weight:900;margin:4px 0 8px}.metric{display:flex;justify-content:space-between;gap:10px;background:#fff;border-radius:11px;padding:10px 12px;font-size:14px;margin:5px 0}.metric b{color:#20a847}
+h2{font-size:18px;margin:10px 0}.muted{color:#888;font-size:13px}.product{padding:14px;border:1px solid #eeeef5;border-radius:16px;margin:10px 0}.product b{font-size:16px}.green{color:#18a744;font-weight:800}.danger{color:#c44;border:0;background:none;padding:8px 0}
+.bottom{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:auto;background:#fff;border-top:1px solid #eee;padding:8px 10px;display:flex;justify-content:space-around}.bottom button{border:0;background:transparent;color:#888;font-size:12px}.bottom button.active{color:#6843e5;font-weight:800}
+.hidden{display:none}.note{font-size:12px;color:#888;line-height:1.4}.goal{background:#f5f1ff;border-radius:14px;padding:14px;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="app">
+<header>МОЯ ПРИБЫЛЬ</header>
+<div class="sub">Калькулятор для продавцов Ozon и Wildberries</div>
+<div class="tabs"><button id="ozon" class="active" onclick="setMarket('Ozon')">Ozon</button><button id="wb" onclick="setMarket('Wildberries')">Wildberries</button></div>
+
+<main>
+<section id="calc">
+<div class="card">
+<label>Название товара</label><input id="name" placeholder="Например, резинка для волос">
+<div class="row"><div><label>Цена продажи, ₽</label><input id="price" type="number" value="449"></div><div><label>Себестоимость, ₽</label><input id="cost" type="number" value="70"></div></div>
+<div class="row"><div><label>Упаковка, ₽</label><input id="pack" type="number" value="15"></div><div><label>Комиссия, %</label><input id="fee" type="number" value="20"></div></div>
+<div class="row"><div><label>Логистика, ₽</label><input id="logistics" type="number" value="60"></div><div><label>Реклама, ₽</label><input id="ads" type="number" value="30"></div></div>
+<button class="primary" onclick="calculate()">РАССЧИТАТЬ ПРИБЫЛЬ</button>
+</div>
+
+<div class="result"><small>Прибыль с 1 товара</small><div class="profit" id="profit">184,20 ₽</div><div class="metric"><span>Маржинальность</span><b id="margin">41,0%</b></div></div>
+
+<div class="card">
+<h2>Какую цену поставить?</h2>
+<div class="row"><div><label>Желаемая прибыль, ₽</label><input id="target" type="number" value="200"></div><div><label>Рекомендуемая цена</label><input id="recommended" readonly></div></div>
+<button class="primary" onclick="priceForTarget()">РАССЧИТАТЬ ЦЕНУ</button>
+</div>
+
+<div class="card">
+<h2>Детализация</h2>
+<div class="metric"><span>Цена продажи</span><span id="dprice">449 ₽</span></div><div class="metric"><span>Себестоимость</span><span id="dcost">70 ₽</span></div>
+<div class="metric"><span>Упаковка</span><span id="dpack">15 ₽</span></div><div class="metric"><span>Комиссия</span><span id="dfee">89,80 ₽</span></div>
+<div class="metric"><span>Логистика</span><span id="dlog">60 ₽</span></div><div class="metric"><span>Реклама</span><span id="dads">30 ₽</span></div>
+<button class="primary" onclick="saveProduct()">СОХРАНИТЬ ТОВАР</button>
+</div>
+<p class="note">Ставки комиссии и логистики можно менять вручную. Расчёт является ориентировочным.</p>
+</section>
+
+<section id="products" class="hidden"><h2>Мои товары</h2><div id="productList"></div></section>
+
+<section id="pro" class="hidden">
+<h2>Моя Прибыль PRO ⭐</h2>
+<div class="card" style="background:linear-gradient(135deg,#7047e8,#8c68ee);color:white;border:0">
+  <div style="font-size:28px;font-weight:900">Больше возможностей</div>
+  <p style="opacity:.9;line-height:1.5">Неограниченные расчёты, расширенная статистика и дополнительные инструменты для продавца.</p>
+  <button class="primary" style="background:white;color:#7047e8" onclick="startTrial()">ПОПРОБОВАТЬ 7 ДНЕЙ БЕСПЛАТНО</button>
+</div>
+<div class="card">
+  <h2>Что входит в PRO</h2>
+  <div class="metric"><span>♾️ Неограниченные расчёты</span><b>✓</b></div>
+  <div class="metric"><span>📊 Расширенная статистика</span><b>✓</b></div>
+  <div class="metric"><span>🎯 Цели и план продаж</span><b>✓</b></div>
+  <div class="metric"><span>💾 История расчётов</span><b>✓</b></div>
+  <div class="metric"><span>📦 Больше сохранённых товаров</span><b>✓</b></div>
+</div>
+<div class="card">
+  <h2>Стоимость</h2>
+  <div style="font-size:30px;font-weight:900">199 ₽ <span class="muted" style="font-size:14px">/ месяц</span></div>
+  <p class="note">В этой версии экран подписки демонстрационный. Подключение реальных платежей добавляется при публикации приложения.</p>
+  <button class="primary" onclick="startTrial()">ВЫБРАТЬ PRO</button>
+</div>
+</section>
+
+<section id="stats" class="hidden">
+<h2>Цель и статистика</h2>
+<div class="card"><label>Продаж за месяц</label><input id="sales" type="number" value="100"><div class="result"><small>Ориентировочная прибыль</small><div class="profit" id="monthly">18 420 ₽</div></div></div>
+<div class="card goal"><b>Цель: 50 000 ₽</b><p class="muted">При текущей прибыли посчитаем, сколько продаж понадобится.</p><div id="needed">Нужно продаж: —</div></div>
+</section>
+</main>
+<div class="bottom">
+<button class="active" onclick="show('calc',this)">🧮<br>Калькулятор</button>
+<button onclick="show('products',this);renderProducts()">📦<br>Товары</button>
+<button onclick="show('stats',this);updateMonthly()">📊<br>Статистика</button>
+<button onclick="show('pro',this)">⭐<br>PRO</button>
+</div>
+</div>
+<script>
+let market='Ozon', products=JSON.parse(localStorage.getItem('myprofit_products')||'[]');
+const money=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n)+' ₽';
+const val=id=>Number(document.getElementById(id).value)||0;
+function setMarket(m){market=m;ozon.classList.toggle('active',m==='Ozon');wb.classList.toggle('active',m==='Wildberries')}
+function calculate(){
+ let p=val('price'),c=val('cost'),pack=val('pack'),fee=p*val('fee')/100,log=val('logistics'),ads=val('ads');
+ let profit=p-c-pack-fee-log-ads,margin=p?profit/p*100:0;
+ profitEl=profit; profitTxt=money(profit); profitEl=profit;
+ document.getElementById('profit').textContent=profitTxt;document.getElementById('margin').textContent=margin.toFixed(1).replace('.',',')+'%';
+ dprice.textContent=money(p);dcost.textContent=money(c);dpack.textContent=money(pack);dfee.textContent=money(fee);dlog.textContent=money(log);dads.textContent=money(ads);updateMonthly();
+}
+function priceForTarget(){let desired=val('target'),fixed=val('cost')+val('pack')+val('logistics')+val('ads'),rate=val('fee')/100,price=(desired+fixed)/(1-rate);recommended.value=price>0?price.toFixed(0):''}
+function saveProduct(){calculate();let item={name:name.value||'Без названия',market,price:val('price'),profit:profitEl};products.unshift(item);localStorage.setItem('myprofit_products',JSON.stringify(products));alert('Товар сохранён!')}
+function renderProducts(){let el=productList;if(!products.length){el.innerHTML='<div class="empty">Пока нет сохранённых товаров.<br>Добавьте первый товар.</div>';return}el.innerHTML=products.map((x,i)=>`<div class="product"><b>${esc(x.name)}</b><div class="muted">${x.market} · Цена ${money(x.price)}</div><div class="green">Прибыль: ${money(x.profit)}</div><button class="danger" onclick="del(${i})">Удалить</button></div>`).join('')}
+function del(i){products.splice(i,1);localStorage.setItem('myprofit_products',JSON.stringify(products));renderProducts()}
+function show(id,btn){['calc','products','stats','pro'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id));document.querySelectorAll('.bottom button').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}
+function updateMonthly(){let sales=val('sales'),p=profitEl||0;monthly.textContent=money(p*sales);needed.textContent='Нужно продаж: '+(p>0?Math.ceil(50000/p):'—')}
+function startTrial(){alert('Демонстрация PRO: пробный период готов к подключению. Реальные платежи подключим на этапе публикации.')}\nfunction esc(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+let profitEl=184.2;calculate();
+sales.addEventListener('input',updateMonthly);
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
